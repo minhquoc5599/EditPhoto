@@ -28,7 +28,7 @@ public class BitmapUtils {
     {
         AssetManager assetManager = context.getAssets();
         InputStream inputStream;
-        Bitmap bitmap =null;
+        Bitmap bitmap = null;
         try{
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
@@ -47,6 +47,7 @@ public class BitmapUtils {
     {
         String[] filePathColumn = {MediaStore.Images.Media.DATA};
         Cursor cursor =context.getContentResolver().query(uri, filePathColumn, null, null, null);
+        assert cursor != null;
         cursor.moveToFirst();
         int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
         String picturePath = cursor.getString(columnIndex);

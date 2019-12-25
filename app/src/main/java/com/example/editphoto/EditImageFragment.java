@@ -46,7 +46,7 @@ public class EditImageFragment extends Fragment implements SeekBar.OnSeekBarChan
         seekbar_saturation = itemView.findViewById(R.id.seakbar_saturation);
 
         seekbar_brightness.setMax(200);
-        seekbar_brightness.setProgress(200);
+        seekbar_brightness.setProgress(100);
 
         seekbar_constrant.setMax(20);
         seekbar_constrant.setProgress(0);

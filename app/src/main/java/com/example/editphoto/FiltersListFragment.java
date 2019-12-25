@@ -106,8 +106,8 @@ public class FiltersListFragment extends Fragment implements FiltersListFragment
                 {
                     ThumbnailItem tI = new ThumbnailItem();
                     tI.image=thumbImg;
-                    tI.filterName= filter.getName();
                     tI.filter = filter;
+                    tI.filterName= filter.getName();
                     ThumbnailsManager.addThumb(tI);
                 }
 

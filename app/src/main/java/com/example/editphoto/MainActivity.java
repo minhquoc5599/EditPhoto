@@ -40,7 +40,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements FiltersListFragmentListener, EditImageFragmentListener {
 
-    public static String pictureName ="flass.jpg";
+    public static String pictureName ="flash.jpg";
     public static final int PERMISSION_PICK_IMAGE = 1000;
 
     ImageView img_preview;
@@ -83,9 +83,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         tabLayout.setupWithViewPager(viewPager);
     }
 
-    private void loadImage() {
-        assert originalBitmap != null;
-        originalBitmap = BitmapUtils.getBitmapFromAssets(this, pictureName, 300, 300);
+    public void loadImage() {
+        originalBitmap = BitmapUtils.getBitmapFromAssets(this, pictureName, 200, 200);
         filteredBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
         finalBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
         img_preview.setImageBitmap(originalBitmap);
@@ -100,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         editImageFragment = new EditImageFragment();
         editImageFragment.setListener(this);
 
-        adapter.addFragment(filtersListFragment, "FILTER");
+        adapter.addFragment(filtersListFragment, "FILTERS");
         adapter.addFragment(editImageFragment, "EDIT");
 
         viewPager.setAdapter(adapter);
@@ -238,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
                         token.continuePermissionRequest();
                     }
-                });
+                }).check();
 
     }
 
@@ -272,13 +271,14 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
 
                     }
-                });
+                }).check();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(resultCode==RESULT_OK && requestCode==PERMISSION_PICK_IMAGE)
         {
+            assert data != null;
             Bitmap bitmap = BitmapUtils.getBitmapFromGallery(this, data.getData(), 800,800);
 
             originalBitmap.recycle();
