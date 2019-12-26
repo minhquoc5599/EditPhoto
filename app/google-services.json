@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "229651559317",
+    "firebase_url": "https://fir-e87dc.firebaseio.com",
+    "project_id": "fir-e87dc",
+    "storage_bucket": "fir-e87dc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229651559317:android:bfd2ae7d6f36f40e6c7c9c",
+        "android_client_info": {
+          "package_name": "com.example.editphoto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "229651559317-m7qsi61qe459fu828egjsd7tp6eunbbv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCc-R0gV1C0KWxHbXpQBSpksoiJKvCuJKI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "229651559317-m7qsi61qe459fu828egjsd7tp6eunbbv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229651559317:android:4ce58f654e74942d6c7c9c",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "229651559317-m7qsi61qe459fu828egjsd7tp6eunbbv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCc-R0gV1C0KWxHbXpQBSpksoiJKvCuJKI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "229651559317-m7qsi61qe459fu828egjsd7tp6eunbbv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

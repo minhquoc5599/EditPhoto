@@ -9,11 +9,14 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,8 +28,13 @@ import com.example.editphoto.Interface.BrushFragmentListener;
 import com.example.editphoto.Interface.EditImageFragmentListener;
 import com.example.editphoto.Interface.FiltersListFragmentListener;
 import com.example.editphoto.Utils.BitmapUtils;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -39,7 +47,9 @@ import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubfilter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.MissingFormatArgumentException;
 
@@ -61,11 +71,14 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     FiltersListFragment filtersListFragment;
     EditImageFragment editImageFragment;
 
-    CardView btn_filters_list, btn_edit, btn_brush;
+    CardView btn_filters_list, btn_edit, btn_brush, btn_save;
+
+    FirebaseStorage storage = FirebaseStorage.getInstance();
 
     int brightnessFinal =0;
     float saturationFinal = 1.0f;
     float constrantFinal =  1.0f;
+
 
     static {
         System.loadLibrary("NativeImageProcessor");
@@ -90,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         btn_edit = findViewById(R.id.btn_edit);
         btn_filters_list = findViewById(R.id.btn_filter_list);
         btn_brush = findViewById(R.id.btn_brush);
+        btn_save = findViewById(R.id.btn_save);
 
         btn_filters_list.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,8 +132,57 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
             }
         });
-
         loadImage();
+
+        final StorageReference storageRef = storage.getReference();
+
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                photoEditor.saveAsBitmap(new OnSaveBitmap() {
+                    @Override
+                    public void onBitmapReady(Bitmap saveBitmap) {
+                        Calendar calendar = Calendar.getInstance();
+                        StorageReference mountainsRef = storageRef.child("image"+calendar.getTimeInMillis()+".png");
+                        photoEditorView.getSource().setImageBitmap(saveBitmap);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        saveBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                        byte[] data = baos.toByteArray();
+
+                        UploadTask uploadTask = mountainsRef.putBytes(data);
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                Toast.makeText(MainActivity.this, "Lỗi!!!", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        String downloadUri = uri.toString();
+                                        Toast.makeText(MainActivity.this, "Lưu hình thành công", Toast.LENGTH_SHORT).show();
+                                        Log.d("AAA", downloadUri);
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+
+                    }
+                });
+
+                photoEditorView.getSource().setDrawingCacheEnabled(true);
+                photoEditorView.getSource().buildDrawingCache();
+                Bitmap bitmap = ((BitmapDrawable) photoEditorView.getSource().getDrawable()).getBitmap();
+
+
+            }
+        });
 
     }
 
