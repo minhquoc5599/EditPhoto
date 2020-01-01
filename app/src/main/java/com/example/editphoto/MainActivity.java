@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.editphoto.Adapter.ViewPagerAdapter;
+import com.example.editphoto.Interface.AddTextFragmentListener;
 import com.example.editphoto.Interface.BrushFragmentListener;
 import com.example.editphoto.Interface.EditImageFragmentListener;
 import com.example.editphoto.Interface.FiltersListFragmentListener;
@@ -57,7 +58,7 @@ import ja.burhanrashid52.photoeditor.OnSaveBitmap;
 import ja.burhanrashid52.photoeditor.PhotoEditor;
 import ja.burhanrashid52.photoeditor.PhotoEditorView;
 
-public class MainActivity extends AppCompatActivity implements FiltersListFragmentListener, EditImageFragmentListener, BrushFragmentListener {
+public class MainActivity extends AppCompatActivity implements FiltersListFragmentListener, EditImageFragmentListener, BrushFragmentListener, AddTextFragmentListener {
 
     public static String pictureName ="flash.jpg";
     public static final int PERMISSION_PICK_IMAGE = 1000;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     FiltersListFragment filtersListFragment;
     EditImageFragment editImageFragment;
 
-    CardView btn_filters_list, btn_edit, btn_brush, btn_save;
+    CardView btn_filters_list, btn_edit, btn_brush, btn_save, btn_add_text;
 
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -104,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         btn_filters_list = findViewById(R.id.btn_filter_list);
         btn_brush = findViewById(R.id.btn_brush);
         btn_save = findViewById(R.id.btn_save);
+        btn_add_text = findViewById(R.id.btn_add_text);
 
         btn_filters_list.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,6 +132,15 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                 brushFragment.setListener(MainActivity.this);
                 brushFragment.show(getSupportFragmentManager(), brushFragment.getTag());
 
+            }
+        });
+
+        btn_add_text.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AddTextFragment addTextFragment = AddTextFragment.getInstance();
+                addTextFragment.setListener(MainActivity.this);
+                addTextFragment.show(getSupportFragmentManager(), addTextFragment.getTag());
             }
         });
         loadImage();
@@ -176,10 +187,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     }
                 });
 
-                photoEditorView.getSource().setDrawingCacheEnabled(true);
-                photoEditorView.getSource().buildDrawingCache();
-                Bitmap bitmap = ((BitmapDrawable) photoEditorView.getSource().getDrawable()).getBitmap();
-
 
             }
         });
@@ -191,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         filteredBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
         finalBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
         photoEditorView.getSource().setImageBitmap(originalBitmap);*/
-        Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/text-recognition-8b752.appspot.com/o/image1576516300429.png?alt=media&token=a1abee36-35fc-4d46-8755-454a99d9a410")
+        Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/fir-e87dc.appspot.com/o/image1577353063840.png?alt=media&token=1baa8933-d3d2-4cb6-8b80-3a38b191f991")
                 .into(photoEditorView.getSource());
     }
 
@@ -437,5 +444,10 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         {
             photoEditor.setBrushDrawingMode(true);
         }
+    }
+
+    @Override
+    public void onAddTextButtonClick(String text, int color) {
+        photoEditor.addText(text, color);
     }
 }
