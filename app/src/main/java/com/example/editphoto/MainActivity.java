@@ -12,6 +12,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import com.example.editphoto.Adapter.ViewPagerAdapter;
 import com.example.editphoto.Interface.AddTextFragmentListener;
 import com.example.editphoto.Interface.BrushFragmentListener;
 import com.example.editphoto.Interface.EditImageFragmentListener;
+import com.example.editphoto.Interface.EmojiFragmentListener;
 import com.example.editphoto.Interface.FiltersListFragmentListener;
 import com.example.editphoto.Utils.BitmapUtils;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -43,22 +45,25 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+import com.yalantis.ucrop.UCrop;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubfilter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.MissingFormatArgumentException;
+import java.util.UUID;
 
 import ja.burhanrashid52.photoeditor.OnSaveBitmap;
 import ja.burhanrashid52.photoeditor.PhotoEditor;
 import ja.burhanrashid52.photoeditor.PhotoEditorView;
 
-public class MainActivity extends AppCompatActivity implements FiltersListFragmentListener, EditImageFragmentListener, BrushFragmentListener, AddTextFragmentListener {
+public class MainActivity extends AppCompatActivity implements FiltersListFragmentListener, EditImageFragmentListener, BrushFragmentListener, AddTextFragmentListener, EmojiFragmentListener {
 
     public static String pictureName ="flash.jpg";
     public static final int PERMISSION_PICK_IMAGE = 1000;
@@ -72,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     FiltersListFragment filtersListFragment;
     EditImageFragment editImageFragment;
 
-    CardView btn_filters_list, btn_edit, btn_brush, btn_save, btn_add_text;
+    CardView btn_filters_list, btn_edit, btn_brush, btn_save, btn_add_text, btn_emoji;
 
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -80,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     float saturationFinal = 1.0f;
     float constrantFinal =  1.0f;
 
+    Uri image_selected_uri;
 
     static {
         System.loadLibrary("NativeImageProcessor");
@@ -98,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         photoEditorView = findViewById(R.id.image_preview);
         photoEditor = new PhotoEditor.Builder(this, photoEditorView)
                 .setPinchTextScalable(true)
+                .setDefaultEmojiTypeface(Typeface.createFromAsset(getAssets(), "emojione-android.ttf"))
                 .build();
         coordinatorLayout = findViewById(R.id.coordinator);
 
@@ -106,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         btn_brush = findViewById(R.id.btn_brush);
         btn_save = findViewById(R.id.btn_save);
         btn_add_text = findViewById(R.id.btn_add_text);
+        btn_emoji = findViewById(R.id.btn_emoji);
 
         btn_filters_list.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,6 +149,15 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                 AddTextFragment addTextFragment = AddTextFragment.getInstance();
                 addTextFragment.setListener(MainActivity.this);
                 addTextFragment.show(getSupportFragmentManager(), addTextFragment.getTag());
+            }
+        });
+
+        btn_emoji.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EmojiFragment emojiFragment = EmojiFragment.getInstace();
+                emojiFragment.setListener(MainActivity.this);
+                emojiFragment.show(getSupportFragmentManager(), emojiFragment.getTag());
             }
         });
         loadImage();
@@ -186,8 +203,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
                     }
                 });
-
-
             }
         });
 
@@ -200,21 +215,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         photoEditorView.getSource().setImageBitmap(originalBitmap);*/
         Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/fir-e87dc.appspot.com/o/image1577353063840.png?alt=media&token=1baa8933-d3d2-4cb6-8b80-3a38b191f991")
                 .into(photoEditorView.getSource());
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
-
-        filtersListFragment = new FiltersListFragment();
-        filtersListFragment.setListener(this);
-
-        editImageFragment = new EditImageFragment();
-        editImageFragment.setListener(this);
-
-        adapter.addFragment(filtersListFragment, "FILTERS");
-        adapter.addFragment(editImageFragment, "EDIT");
-
-        viewPager.setAdapter(adapter);
     }
 
     @Override
@@ -399,10 +399,11 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(resultCode==RESULT_OK && requestCode==PERMISSION_PICK_IMAGE)
-        {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == PERMISSION_PICK_IMAGE) {
             assert data != null;
-            Bitmap bitmap = BitmapUtils.getBitmapFromGallery(this, data.getData(), 800,800);
+            Bitmap bitmap = BitmapUtils.getBitmapFromGallery(this, data.getData(), 800, 800);
+
 
             originalBitmap.recycle();
             finalBitmap.recycle();
@@ -416,7 +417,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
             filtersListFragment.displayThumbnail(originalBitmap);
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -449,5 +449,10 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     @Override
     public void onAddTextButtonClick(String text, int color) {
         photoEditor.addText(text, color);
+    }
+
+    @Override
+    public void onEmojiSelected(String emoji) {
+        photoEditor.addEmoji(emoji);
     }
 }
